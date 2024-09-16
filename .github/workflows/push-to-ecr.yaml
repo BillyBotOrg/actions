@@ -78,15 +78,16 @@ jobs:
             localhost:5000/${{ steps.lower-repo.outputs.repository }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
-#
-#      - name: Setup Regctl & Push Commit Tag
-#        run: |
-#          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 > regctl
-#          chmod +x regctl
-#          ./regctl registry set --tls=disabled localhost:5000
-#          ./regctl image copy localhost:5000/${{ steps.lower-repo.outputs.repository }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ github.sha }}
-#
-#      - name: Push Latest
-#        if: ${{ inputs.latest }}
-#        run: |
-#          ./regctl image copy localhost:5000/${{ steps.lower-repo.outputs.repository }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
+          platforms: ${{ inputs.platform }}
+
+      - name: Setup Regctl & Push Commit Tag
+        run: |
+          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 > regctl
+          chmod +x regctl
+          ./regctl registry set --tls=disabled localhost:5000
+          ./regctl image copy localhost:5000/${{ steps.lower-repo.outputs.repository }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ github.sha }}
+
+      - name: Push Latest
+        if: ${{ inputs.latest }}
+        run: |
+          ./regctl image copy localhost:5000/${{ steps.lower-repo.outputs.repository }} ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
