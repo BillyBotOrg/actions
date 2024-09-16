@@ -59,26 +59,25 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # Improved Cache Docker layers step to ensure proper caching
       - name: Cache Docker layers
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ inputs.working-directory }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ inputs.working-directory }}-
+            ${{ runner.os }}-buildx-
 
       - name: Build Docker Image
         uses: docker/build-push-action@v6
         with:
           context: ${{ inputs.working-directory }}
           file: ${{ inputs.working-directory }}/${{ inputs.docker-file }}
-          push: false
+          push: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ inputs.repo }}:latest
+            localhost:5000/${{ steps.lower-repo.outputs.repository }}
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          platforms: ${{ inputs.platform }}
 
       - name: Setup Regctl & Push Commit Tag
         run: |
